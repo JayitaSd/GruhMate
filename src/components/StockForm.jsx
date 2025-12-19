@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { chef } from '../assets/images';
 
-const AddInventoryItem = () => {
+const StockForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     expiryDate: '',
@@ -607,4 +607,4 @@ const AddInventoryItem = () => {
   );
 };
 
-export default AddInventoryItem;
+export default StockForm;
