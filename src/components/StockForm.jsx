@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { chef } from '../assets/images';
+import Footer from './Footer';
 
 const StockForm = () => {
   const [formData, setFormData] = useState({
@@ -585,24 +586,7 @@ const StockForm = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white mt-12">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg"></div>
-                <span className="text-xl font-bold">GruhMate Inventory</span>
-              </div>
-              <p className="text-gray-400 mt-2">Smart kitchen management system</p>
-            </div>
-            
-            <div className="text-center md:text-right">
-              <p className="text-gray-400">© 2026 GruhMate. All rights reserved.</p>
-              <p className="text-gray-500 text-sm mt-2">Add Item Form</p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
