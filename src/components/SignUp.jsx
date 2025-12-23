@@ -8,265 +8,199 @@ const SignUp = () => {
     name: '',
     phone: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    otp: ''
   });
-  const [errors, setErrors] = useState({
-    name: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  });
+
+  const [errors, setErrors] = useState({});
+  const [otpSent, setOtpSent] = useState(false);      // 
+  const [otpVerified, setOtpVerified] = useState(false); // 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
+    setFormData({ ...formData, [name]: value });
+    if (errors[name]) setErrors({ ...errors, [name]: '' });
+  };
+
+  // ✅ Step 1: Send OTP
+  const handleSendOtp = async () => {
+    if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
+      setErrors({ ...errors, phone: 'Enter valid 10-digit phone number' });
+      return;
+    }
+    try {
+      // Call backend /api/auth/signup to trigger Twilio Verify
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          password: formData.password
+        })
       });
+      if (res.ok) {
+        setOtpSent(true);
+        alert('OTP sent to your phone!');
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Error sending OTP');
+      }
+    } catch (err) {
+      alert('Server error: ' + err.message);
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    let isValid = true;
-
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-      isValid = false;
-    } else if (formData.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
-      isValid = false;
+  // ✅ Step 2: Verify OTP
+  const handleVerifyOtp = async () => {
+    if (!formData.otp) {
+      setErrors({ ...errors, otp: 'Enter OTP' });
+      return;
     }
-
-    // Phone validation
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-      isValid = false;
-    } else if (!/^\d{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter a valid 10-digit phone number';
-      isValid = false;
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.phone, code: formData.otp })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setOtpVerified(true);
+        alert('OTP verified successfully!');
+      } else {
+        alert(data.message || 'Invalid OTP');
+      }
+    } catch (err) {
+      alert('Server error: ' + err.message);
     }
-
-    // Password validation
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
-      isValid = false;
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-      isValid = false;
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword.trim()) {
-      newErrors.confirmPassword = 'Please confirm your password';
-      isValid = false;
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      // For demo purposes, just log the data
-      console.log('Sign up form submitted:', formData);
-      
-      // Show success message and navigate to login
-      alert('Account created successfully! You can now login.');
-      navigate('/login');
-    }
+  // ✅ Step 3: Final account creation (after OTP verified)
+  const handleCreateAccount = () => {
+    alert('Account created successfully! You can now login.');
+    navigate('/login');
   };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-linear-to-br from-blue-50 to-blue-400 py-8">
       <div className="flex w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden">
         
-        {/* Left side - Image/Illustration - Reduced height */}
+        {/* Left side */}
         <div className="hidden md:flex md:w-1/2 bg-blue-50 items-center justify-center p-6 animate-slideInLeft">
           <div className="text-center">
             <div className="w-48 h-48 bg-white rounded-full flex items-center justify-center shadow-lg mx-auto mb-4">
-              <img 
-                src={chef} 
-                alt="GruhMate Chef" 
-                className="w-40 h-40 rounded-full object-cover"
-              />
+              <img src={chef} alt="GruhMate Chef" className="w-40 h-40 rounded-full object-cover" />
             </div>
             <h3 className="text-lg font-bold text-gray-800 mb-2">Join GruhMate</h3>
             <p className="text-sm text-gray-600">Start managing your kitchen smarter</p>
           </div>
         </div>
 
-        {/* Right side - Sign Up Form - Reduced padding */}
+        {/* Right side */}
         <div className="w-full md:w-1/2 p-6 md:p-8 animate-slideInRight">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4">
             <div className="text-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-              <p className="text-gray-600 text-sm mt-1">
-                Sign up to manage your kitchen inventory
-              </p>
+              <p className="text-gray-600 text-sm mt-1">Sign up to manage your kitchen inventory</p>
             </div>
 
-            {/* Name Input */}
-            <div className="space-y-1">
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs font-medium ml-3">{errors.name}</p>
-              )}
-            </div>
+            {/* Name */}
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full text-sm"
+            />
+            {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
 
-            {/* Phone Input */}
-            <div className="space-y-1">
-              <input
-                type="text"
-                name="phone"
-                placeholder="Phone Number"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-              />
-              {errors.phone && (
-                <p className="text-red-500 text-xs font-medium ml-3">{errors.phone}</p>
-              )}
-            </div>
+            {/* Phone */}
+            <input
+              type="text"
+              name="phone"
+              placeholder="Phone Number"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full text-sm"
+            />
+            {errors.phone && <p className="text-red-500 text-xs">{errors.phone}</p>}
 
-            {/* Password Input */}
-            <div className="space-y-1">
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-              />
-              {errors.password && (
-                <p className="text-red-500 text-xs font-medium ml-3">{errors.password}</p>
-              )}
-            </div>
+            {/* Password */}
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full text-sm"
+            />
+            {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
 
-            {/* Confirm Password Input */}
-            <div className="space-y-1">
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-xs font-medium ml-3">{errors.confirmPassword}</p>
-              )}
-            </div>
+            {/* Confirm Password */}
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full text-sm"
+            />
+            {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
 
-            {/* Terms and Conditions - Compact */}
-            <div className="flex items-center mt-2">
-              <input
-                type="checkbox"
-                id="terms"
-                className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="terms" className="ml-2 text-xs text-gray-600">
-                I agree to the{' '}
-                <button type="button" className="text-blue-600 hover:text-blue-800 text-xs">
-                  Terms & Conditions
-                </button>
-              </label>
-            </div>
-
-            {/* Sign Up Button */}
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm mt-4"
-            >
-              CREATE ACCOUNT
-            </button>
-
-            {/* Divider - Reduced spacing */}
-            <div className="relative py-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-gray-500 text-xs">
-                  Already have an account?
-                </span>
-              </div>
-            </div>
-
-            {/* Login Link */}
-            <div className="text-center">
+            {/* Step 1: Send OTP */}
+            {!otpSent && (
               <button
                 type="button"
-                onClick={() => navigate('/login')}
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
+                onClick={handleSendOtp}
+                className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-full mt-4"
               >
-                Login to your account
+                Send OTP
               </button>
-            </div>
+            )}
+
+            {/* Step 2: Enter OTP + Verify */}
+            {otpSent && !otpVerified && (
+              <>
+                <input
+                  type="text"
+                  name="otp"
+                  placeholder="Enter OTP"
+                  value={formData.otp}
+                  onChange={handleInputChange}
+                  className="w-full px-5 py-2.5 bg-gray-50 border border-gray-300 rounded-full text-sm text-center tracking-widest"
+                />
+                {errors.otp && <p className="text-red-500 text-xs">{errors.otp}</p>}
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  className="w-full py-2.5 bg-green-600 text-white font-bold rounded-full mt-4"
+                >
+                  Verify OTP
+                </button>
+              </>
+            )}
+
+            {/* Step 3: Final Create Account */}
+            {otpVerified && (
+              <button
+                type="button"
+                onClick={handleCreateAccount}
+                className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-full mt-4"
+              >
+                Verify & Create Account
+              </button>
+            )}
           </form>
 
-          {/* Back to Home Link - Smaller */}
           <div className="mt-6 text-center">
-            <Link 
-              to="/" 
-              className="text-gray-500 hover:text-gray-700 text-xs transition-colors"
-            >
-              ← Back to Home
-            </Link>
+            <Link to="/" className="text-gray-500 hover:text-gray-700 text-xs">← Back to Home</Link>
           </div>
         </div>
       </div>
-
-      {/* Tailwind CSS animations */}
-      <style jsx>{`
-        @keyframes slideInLeft {
-          from {
-            transform: translateX(-100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes slideInRight {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-        
-        .animate-slideInLeft {
-          animation: slideInLeft 0.8s ease-out forwards;
-        }
-        
-        .animate-slideInRight {
-          animation: slideInRight 0.8s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };
 
 export default SignUp;
+

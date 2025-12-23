@@ -2,9 +2,12 @@ import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { hero, priceTrack, inventory, chef } from '../assets/images';
 import Footer from './Footer';
-
+import Teams from './Teams';
+//bht changes karni hain in frontend(by anshu)
+//navbar banana baaki hai
+//flow sabka sahi karna baaki hai abhi tak
 const HomePage = () => {
-  // Create refs for scrolling
+  
   const aboutSectionRef = useRef(null);
   const featuresSectionRef = useRef(null);
 
@@ -82,6 +85,13 @@ const HomePage = () => {
               >
                 Get Started
               </Link>
+              {/* <Link 
+                to="/teams"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+              >
+             TeamPage
+              </Link> */}
+              {/* <a href="/teams" className="px-3 py-2">Teams</a> */}
             </div>
           </div>
         </div>

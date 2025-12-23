@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { chef } from '../assets/images'; // Assuming you have a chef image
+import { chef } from '../assets/images';
+import { useAuth } from '../context/AuthContext';  
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();  
   const [formData, setFormData] = useState({
     phone: '',
     password: ''
@@ -20,7 +22,6 @@ const Login = () => {
       ...formData,
       [name]: value
     });
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -47,32 +48,41 @@ const Login = () => {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setInValidCredentials(false);
+  
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setInValidCredentials(false);
+  console.log("Login payload: login.jsx mein hu", { phone: formData.phone, password: formData.password });
 
-    if (validateForm()) {
-      // Mock login - In a real app, you would make an API call here
-      console.log('Form submitted:', formData);
-      
-      // Simulate API call
-      setTimeout(() => {
-        // For demo purposes, assume login is successful
-        // In real app, check credentials with backend
-        localStorage.setItem('user', JSON.stringify({ 
-          fullName: 'Demo User', 
-          role: 'user' 
-        }));
-        localStorage.setItem('token', 'demo-token-123');
-        localStorage.setItem('isLoggedIn', 'true');
-        
-        // Navigate to home page
-        navigate('/dashboard');
-      }, 500);
-    } else {
+
+  if (validateForm()) {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData), // only phone + password
+      });
+
+      const data = await res.json();
+      console.log("Login response:", data); // ✅ see token + user here
+
+      if (res.ok) {
+        // ✅ use token + user from response, not formData
+        login(data.user, data.token);
+        // navigate("/dashboard");
+        navigate("/stockform");  
+      } else {
+        setInValidCredentials(true);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
       setInValidCredentials(true);
     }
-  };
+  } else {
+    setInValidCredentials(true);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-linear-to-br from-blue-50 to-blue-400">
