@@ -1,0 +1,190 @@
+.comparison-card {
+  background: #1e2128;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.comparison-header {
+  padding: 20px;
+}
+
+.product-image-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 16px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comparison-product-image {
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+  object-fit: contain;
+}
+
+.comparison-no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 200px;
+  color: #ccc;
+}
+
+.product-header-info {
+  text-align: center;
+}
+
+.product-brand {
+  color: #888;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  text-transform: capitalize;
+}
+
+.product-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.store-comparison-list {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.store-comparison-item {
+  background: #2a2d35;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.store-comparison-item:hover {
+  background: #32353d;
+  transform: translateX(4px);
+}
+
+.store-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.store-badge-large {
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  height: 36px;
+  font-weight: 700;
+}
+
+.store-badge-large .badge-icon {
+  font-size: 18px;
+}
+
+.store-badge-large .badge-text {
+  color: white;
+  font-size: 14px;
+  text-transform: lowercase;
+  font-weight: 700;
+}
+
+.store-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.store-quantity {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.store-delivery {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.store-price-info {
+  text-align: right;
+}
+
+.store-price {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* DMart specific styling */
+.store-comparison-item.dmart .store-badge-large {
+  background: linear-gradient(135deg, #00a650 0%, #00c461 100%);
+}
+
+/* Zepto specific styling */
+.store-comparison-item.zepto .store-badge-large {
+  background: linear-gradient(135deg, #8a2be2 0%, #9d4edd 100%);
+}
+
+/* Blinkit specific styling */
+.store-comparison-item.blinkit .store-badge-large {
+  background: linear-gradient(135deg, #ffc700 0%, #ffd13d 100%);
+}
+
+@media (max-width: 768px) {
+  .comparison-header {
+    padding: 16px;
+  }
+
+  .product-image-wrapper {
+    max-width: 240px;
+    min-height: 180px;
+    padding: 16px;
+  }
+
+  .comparison-product-image {
+    max-height: 200px;
+  }
+
+  .product-title {
+    font-size: 18px;
+  }
+
+  .store-comparison-item {
+    padding: 12px;
+  }
+
+  .store-badge-large {
+    min-width: 80px;
+    padding: 6px 12px;
+  }
+
+  .store-quantity {
+    font-size: 14px;
+  }
+
+  .store-price {
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,166 @@
+.category-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.page-header {
+  background: white;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  background: transparent;
+  border: 2px solid #8a2be2;
+  color: #8a2be2;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.back-button:hover {
+  background: #8a2be2;
+  color: white;
+  transform: translateX(-4px);
+}
+
+.header-content h1 {
+  margin: 0.5rem 0 0.5rem 0;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.header-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.page-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
+}
+
+.error-message {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+}
+
+.error-message p {
+  margin: 0;
+  color: #991b1b;
+  font-weight: 500;
+}
+
+.results-summary {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.results-summary h2 {
+  font-size: 1.75rem;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.search-term {
+  color: #8a2be2;
+  font-weight: 700;
+}
+
+.results-summary p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.comparison-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.welcome-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  margin-top: 3rem;
+}
+
+.welcome-content {
+  text-align: center;
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.welcome-icon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.welcome-content h2 {
+  font-size: 1.75rem;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.welcome-content p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 1rem;
+  }
+
+  .header-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .page-main {
+    padding: 0 1rem 1rem;
+  }
+
+  .comparison-container {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-content {
+    padding: 2rem;
+  }
+}

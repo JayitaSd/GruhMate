@@ -1,0 +1,140 @@
+.category-selector {
+  margin-bottom: 2rem;
+}
+
+.category-title {
+  text-align: center;
+  font-size: 1.75rem;
+  color: #1f2937;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+.category-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.category-card {
+  background: white;
+  border: 3px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #8a2be2, #ffc700);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-color: #8a2be2;
+}
+
+.category-card:hover::before {
+  transform: scaleX(1);
+}
+
+.category-card.active {
+  border-color: #8a2be2;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.05) 0%, rgba(255, 199, 0, 0.05) 100%);
+  box-shadow: 0 8px 16px rgba(138, 43, 226, 0.2);
+}
+
+.category-card.active::before {
+  transform: scaleX(1);
+}
+
+.category-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.category-card h3 {
+  font-size: 1.5rem;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.category-card p {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.store-logos {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.store-tag {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.store-tag.zepto {
+  background: rgba(138, 43, 226, 0.1);
+  color: #8a2be2;
+}
+
+.store-tag.blinkit {
+  background: rgba(255, 199, 0, 0.2);
+  color: #d97706;
+}
+
+.store-tag.amazon {
+  background: rgba(255, 153, 0, 0.1);
+  color: #ff9900;
+}
+
+.store-tag.flipkart {
+  background: rgba(41, 98, 255, 0.1);
+  color: #2962ff;
+}
+
+@media (max-width: 640px) {
+  .category-title {
+    font-size: 1.5rem;
+  }
+
+  .category-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .category-card {
+    padding: 1.5rem;
+  }
+}

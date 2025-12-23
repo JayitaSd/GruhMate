@@ -4,8 +4,13 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 import cors from "cors";
 import teamRoutes from "./routes/team.js"
+import groceryRoutes from './routes/groceryRoutes.js'
+import techRoutes from './routes/techRoutes.js'
+import  {closeBrowser } from "./utils/browserUtils.js";
+
 // import Stock from "./models/Stock.js";
 import stockRoutes from "./routes/stock.js";
+import bodyParser from "body-parser";
 
 dotenv.config();
 // dotenv.config({ path: './.env' });
@@ -13,6 +18,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(bodyParser.json());
 
 app.use(cors());
 
@@ -29,6 +35,12 @@ app.use("/api/team", teamRoutes);
 
 // app.use('/api/stocks', Stock);
 app.use('/api/stock', stockRoutes);
+app.use("/", groceryRoutes);
+app.use("/", techRoutes);
+process.on('SIGINT', async () => {
+  await closeBrowser();
+  process.exit(0);
+});
 
 
 const PORT = process.env.PORT || 5000;
