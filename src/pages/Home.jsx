@@ -7,7 +7,6 @@ export default function Home() {
   return (
     <div className="home-page">
       <div className="home-header">
-        <h1 className="home-title">PriceWise</h1>
         <p className="home-subtitle">Compare prices instantly and save money</p>
       </div>
 
@@ -21,10 +20,10 @@ export default function Home() {
           >
             <div className="category-icon">🛒</div>
             <h3>Groceries</h3>
-            <p>Compare prices from Zepto & Blinkit</p>
+            <p>Compare prices from Zepto & JoiMart</p>
             <div className="store-badges">
               <span className="badge zepto">⚡ Zepto</span>
-              <span className="badge blinkit">🛒 Blinkit</span>
+              <span className="badge blinkit">🛒 JioMart</span>
             </div>
             <div className="card-footer">
               <span>Start Shopping →</span>

@@ -14,10 +14,10 @@ export function CategorySelector({ selectedCategory, onCategoryChange }) {
         >
           <div className="category-icon">🛒</div>
           <h3>Groceries</h3>
-          <p>Compare prices from Zepto & Blinkit</p>
+          <p>Compare prices from Zepto & JioMart</p>
           <div className="store-logos">
             <span className="store-tag zepto">⚡ Zepto</span>
-            <span className="store-tag blinkit">🛒 Blinkit</span>
+            <span className="store-tag JioMart">🛒 JioMart</span>
           </div>
         </button>
 

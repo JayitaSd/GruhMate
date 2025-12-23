@@ -15,7 +15,7 @@ export function ComparisonCard({ productName, products, mainImage }) {
   const getStoreBadge = (store) => {
     const badges = {
       Zepto: { icon: '⚡', color: '#8a2be2', name: 'zepto' },
-      Blinkit: { icon: '', color: '#ffc700', name: 'blinkit' },
+      JioMart: { icon: '', color: '#ffc700', name: 'JioMart' },
       DMart: { icon: '', color: '#00a650', name: 'dmart' },
     };
     return badges[store] || { icon: '🏪', color: '#666', name: 'store' };

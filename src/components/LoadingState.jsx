@@ -15,10 +15,10 @@ export function LoadingState({ category = 'grocery' }) {
 
   const storeConfig = {
     grocery: {
-      message: 'Searching Zepto and Blinkit for the best deals',
+      message: 'Searching Zepto and JioMart for the best deals',
       stores: [
         { name: 'Zepto', icon: '⚡', class: 'zepto' },
-        { name: 'Blinkit', icon: '🛒', class: 'blinkit' }
+        { name: 'JioMart', icon: '🛒', class: 'JioMart' }
       ]
     },
     tech: {
