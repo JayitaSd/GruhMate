@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { chef } from "../assets/images";
@@ -11,7 +11,9 @@ const BuyList = () => {
 
   const [buyList, setBuyList] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [detectedItems, setDetectedItems] = useState([]);
   // Fetch BuyList from backend
   const fetchBuyList = async () => {
     try {
@@ -35,6 +37,42 @@ const BuyList = () => {
       fetchBuyList();
     }
   }, [teamId]);
+  const fileInputRef = useRef(null);
+
+  const openCamera = () => {
+    fileInputRef.current.click();
+  };
+  const onImageSelected = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+ const scanImage = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+      formData.append("teamId", teamId);
+      const res = await axios.post(
+        "http://localhost:5000/api/scan-stock",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setDetectedItems(res.data); // Gemini output
+      console.log("Detected:", res.data);
+    } catch (err) {
+      console.error("Scan failed", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -98,8 +136,47 @@ const BuyList = () => {
                 )}
               </tbody>
             </table>
+
           </div>
+
         </div>
+        <button onClick={openCamera} style={{ cursor: "pointer" }} className="bg-blue-600 text-white px-4 py-2 rounded my-3 mx-2">
+          📷 Add Stock via Image
+        </button>
+
+        <input
+          className="bg-blue-600 text-white px-4 py-2 rounded" style={{ cursor: "pointer" }}
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          capture="environment"
+          hidden
+          onChange={onImageSelected}
+        />
+        {imagePreview && (
+          <img
+            src={imagePreview}
+            style={{ width: 250, marginTop: 16, borderRadius: 8 }}
+          />
+        )}
+        {selectedFile && (
+  <button
+    style={{ marginTop: 12,cursor:"pointer" }}
+    onClick={scanImage}
+  >
+    🔍 Scan Image
+  </button>
+)}
+ {detectedItems.length > 0 && (
+          <div className="mt-6 bg-white p-4 rounded shadow">
+            <h3 className="font-bold mb-2">Detected Items</h3>
+            {detectedItems.map((i, idx) => (
+              <div key={idx}>
+                {i.item} – {i.quantity} {i.unit}
+              </div>
+            ))}
+            </div>)}
+
       </main>
 
       <Footer />

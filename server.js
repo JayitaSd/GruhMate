@@ -7,7 +7,7 @@ import teamRoutes from "./routes/team.js"
 import groceryRoutes from './routes/groceryRoutes.js'
 import techRoutes from './routes/techRoutes.js'
 import  {closeBrowser } from "./utils/browserUtils.js";
-
+import scanStockRoute from "./routes/scanStock.js";
 // import Stock from "./models/Stock.js";
 import stockRoutes from "./routes/stock.js";
 import bodyParser from "body-parser";
@@ -37,6 +37,7 @@ app.use("/api/team", teamRoutes);
 app.use('/api/stock', stockRoutes);
 app.use("/", groceryRoutes);
 app.use("/", techRoutes);
+app.use("/api", scanStockRoute);
 process.on('SIGINT', async () => {
   await closeBrowser();
   process.exit(0);
