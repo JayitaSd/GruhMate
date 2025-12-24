@@ -1,4 +1,5 @@
 // routes/auth.js
+console.log("loaded auth route")
 import express from "express";
 import jwt from "jsonwebtoken";
 // import User from "../models/user.js";
@@ -73,6 +74,7 @@ router.post("/verify-otp", async (req, res) => {
 
 
 router.post("/login", async (req, res) => {
+  console.log("in login route")
  
 // const user = await User.findOne({ phone: formattedPhone });
 
@@ -81,6 +83,8 @@ router.post("/login", async (req, res) => {
      const formattedPhone = `+91${phone}`;
 
     const user = await User.findOne({  phone: formattedPhone });
+    console.log("pura user hai:")
+    console.log(user);
     if (!user) {
       return res.status(400).json({ message: "Invalid phone or password" });
     }
@@ -100,6 +104,7 @@ router.post("/login", async (req, res) => {
         _id: user._id,
         phone: user.phone,
         name: user.name,   
+        teamId:user.team
       },
     });
   } catch (err) {

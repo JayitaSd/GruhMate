@@ -11,6 +11,7 @@ import { PublicRoute, PrivateRoute } from './routes/Guards'
 import Home from './pages/Home'
 import GroceryPage from './pages/GroceryPage'
 import { TechPage } from './pages/TechPage'
+import BuyList from './components/BuyList'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
 
           {/* Private routes */}
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                  {/* <Route path="/buylist" element={<BuyList />} /> */}
           <Route path="/stockform" element={<PrivateRoute><StockForm /></PrivateRoute>} />
           <Route path="/compare" element={<PrivateRoute><Home /></PrivateRoute>} />
           {/* <Route path="/teams" element={<Teams/>} /> */}

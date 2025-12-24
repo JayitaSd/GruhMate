@@ -3,9 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { chef } from "../assets/images";
 import Footer from "./Footer";
+import { useAuth } from "../context/AuthContext";
 
 const StockForm = () => {
   const navigate = useNavigate();
+
+
+
+  const { currentUser } = useAuth();
+  const teamId = currentUser?.teamId;   // ✅ get teamId directly
 
   
   const [formData, setFormData] = useState({
@@ -76,7 +82,7 @@ const StockForm = () => {
     }
 
     try {
-      const teamId = localStorage.getItem("teamId");
+      // const teamId = localStorage.getItem("teamId");
       if (!teamId) {
         alert("Team not found. Please login again.");
         return;

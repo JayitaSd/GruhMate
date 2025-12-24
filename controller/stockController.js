@@ -33,14 +33,30 @@ export const addStock = async (req, res) => {
 
 
 /* ================= GET STOCK BY TEAM ================= */
+// export const getStockByTeam = async (req, res) => {
+//   try {
+//     const { teamId } = req.params;
+
+//     const stock = await Stock.find({ teamId }).populate('teamId', 'teamName');
+
+
+//     res.json(stock);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 export const getStockByTeam = async (req, res) => {
   try {
     const { teamId } = req.params;
 
-    const stock = await Stock.find({ teamId }).populate('teamId', 'teamName');
+    if (!teamId || teamId === "undefined" || teamId === "null") {
+      return res.status(400).json({ message: "Invalid teamId" });
+    }
 
+    const stock = await Stock.find({ teamId }).populate("teamId", "teamName");
     res.json(stock);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+

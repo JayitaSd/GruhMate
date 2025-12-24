@@ -5,8 +5,9 @@ import { chef } from "../assets/images";
 import Footer from "./Footer";
 import { useAuth } from "../context/AuthContext";
 
-const Dashboard = () => {
+const Dashboard = () => { 
 
+  const { currentUser } = useAuth();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation(); //muje nhi pata gpt ne add kiya hai(by anshu)
@@ -25,7 +26,10 @@ const Dashboard = () => {
   const fetchStocks = async () => {
     try {
       setLoading(true);
-      const teamId = localStorage.getItem("teamId");
+      // const teamId = localStorage.getItem("teamId");
+      // const { currentUser } = useAuth();
+      const teamId = currentUser?.teamId;
+
       const res = await axios.get(
         // `http://localhost:5000/api/stocks/team/${teamId}`
          `http://localhost:5000/api/stock/team/${teamId}`,{
@@ -75,6 +79,102 @@ const Dashboard = () => {
     logout();
     navigate("/", { replace: true });
   };
+
+// import { useNavigate } from "react-router-dom";
+
+// inside Dashboard component
+// const navigate = useNavigate();
+
+const handleDecrease = async (id) => {
+  try {
+    const res = await axios.patch(
+      `http://localhost:5000/api/stock/${id}/decrement`,
+      {},
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+
+    const updatedStock = res.data.stock;
+
+    setStocks((prev) =>
+      prev.map((s) =>
+        s._id === id ? { ...s, quantity: updatedStock.quantity } : s
+      )
+    );
+
+    // ✅ If item added to BuyList → navigate to BuyList page
+    if (res.data.buyItem) {
+      alert(res.data.message);
+      navigate("/buylist"); // redirect to BuyList.jsx
+    }
+  } catch (err) {
+    console.error("Decrease error:", err);
+  }
+};
+
+// const handleDecrease = async (id) => {
+//   try {
+//     const res = await axios.patch(
+//       `http://localhost:5000/api/stock/${id}/decrement`,
+//       {},
+//       {
+//         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//       }
+//     );
+
+//     const updatedStock = res.data.stock;
+
+//     setStocks((prev) =>
+//       prev.map((s) =>
+//         s._id === id ? { ...s, quantity: updatedStock.quantity } : s
+//       )
+//     );
+
+//     if (updatedStock.quantity === 0) {
+//       alert(`⚠️ Stock for ${updatedStock.name} has reached ZERO!`);
+//     }
+//   } catch (err) {
+//     console.error("Decrease error:", err);
+//   }
+// };
+
+//anshu yaha tune mistake ki thi
+
+// const handleIncrease = async (id, currentQuantity) => {
+//   try {
+//     const res = await axios.put(
+//       `http://localhost:5000/api/stock/${id}/increment`,
+//       { quantity: currentQuantity + 1 },   // ✅ increment by 1
+//       {
+//         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//       }
+//     );
+//     // Update local state
+//     setStocks((prev) =>
+//       prev.map((s) => (s._id === id ? { ...s, quantity: res.data.quantity } : s))
+//     );
+//   } catch (err) {
+//     console.error("Increase error:", err);
+//   }
+// };
+const handleIncrease = async (id) => {
+  try {
+    const res = await axios.patch(
+      `http://localhost:5000/api/stock/${id}/increment`,
+      {}, // no body needed, backend increments itself
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+
+    const updatedStock = res.data.stock;
+
+    setStocks((prev) =>
+      prev.map((s) =>
+        s._id === id ? { ...s, quantity: updatedStock.quantity } : s
+      )
+    );
+  } catch (err) {
+    console.error("Increase error:", err);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -223,6 +323,23 @@ const Dashboard = () => {
                             {status.toUpperCase()}
                           </span>
                         </td>
+                       
+                         <td className="py-3 px-6">
+          <button onClick={() => handleDecrease(item._id,item.quantity)}
+            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Delete
+          </button>
+        </td>
+ <td className="py-3 px-6">
+          <button onClick={() => handleIncrease(item._id, item.quantity)}
+            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            add
+          </button>
+        </td>        
+
+                        {/* <button>delete stock</button> */}
                       </tr>
                     );
                   })
@@ -233,6 +350,7 @@ const Dashboard = () => {
 
           <div className="px-6 py-4 bg-gray-50 text-sm text-gray-600">
             Showing {stocks.length} items
+           
           </div>
         </div>
       </main>
