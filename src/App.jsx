@@ -12,34 +12,39 @@ import Home from './pages/Home'
 import GroceryPage from './pages/GroceryPage'
 import { TechPage } from './pages/TechPage'
 import BuyList from './components/BuyList'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ToastContainer
+          position="bottom-right"
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+        />
+
         <Routes>
-          {/* HomePage only when NOT logged in */}
           <Route path="/" element={<PublicRoute><HomePage /></PublicRoute>} />
 
-          {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgotpwd" element={<ForgotPassword />} />
           <Route path="/grocery" element={<GroceryPage />} />
           <Route path="/tech" element={<TechPage />} />
 
-          {/* Private routes */}
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                  <Route path="/buylist" element={<BuyList />} />
+          <Route path="/buylist" element={<BuyList />} />
           <Route path="/stockform" element={<PrivateRoute><StockForm /></PrivateRoute>} />
           <Route path="/compare" element={<PrivateRoute><Home /></PrivateRoute>} />
-          {/* <Route path="/teams" element={<Teams/>} /> */}
-           <Route path="/teams" element={<PrivateRoute><Teams/></PrivateRoute>} />
-
+          <Route path="/teams" element={<PrivateRoute><Teams /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
   )
 }
 
-export default App;
+export default App

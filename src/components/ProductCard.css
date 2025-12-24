@@ -272,6 +272,21 @@
   min-width: 120px;
   text-align: center;
 }
+.btn {
+  padding: 13px 11px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+  line-height: 1.2;
+}
+
 
 .btn:disabled {
   opacity: 0.6;
