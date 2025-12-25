@@ -113,15 +113,13 @@ router.post("/login", async (req, res) => {
 });
 
 
-/**
- * FORGOT PASSWORD (send OTP via Verify)
- */
 router.post("/forgot-password", async (req, res) => {
   try {
     const { phone } = req.body;
 
+    // Phone should already be formatted as +91XXXXXXXXXX from frontend
     const user = await User.findOne({ phone });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "User not found with this phone number" });
 
     await client.verify.v2
       .services(process.env.TWILIO_VERIFY_SERVICE_SID)
@@ -129,13 +127,11 @@ router.post("/forgot-password", async (req, res) => {
 
     res.json({ message: "Password reset OTP sent via SMS" });
   } catch (err) {
+    console.error("Forgot password error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-/**
- * RESET PASSWORD (verify OTP + set new password)
- */
 router.post("/reset-password", async (req, res) => {
   try {
     const { phone, code, newPassword } = req.body;
@@ -152,10 +148,11 @@ router.post("/reset-password", async (req, res) => {
     if (!user) return res.status(400).json({ message: "User not found" });
 
     user.password = newPassword;
-    await user.save();
+    await user.save(); // Pre-save hook will hash the password
 
     res.json({ message: "Password reset successful" });
   } catch (err) {
+    console.error("Reset password error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });

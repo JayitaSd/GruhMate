@@ -14,6 +14,7 @@ import { TechPage } from './pages/TechPage'
 import BuyList from './components/BuyList'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import TeamDetail from './components/TeamDetail'
 
 function App() {
   return (
@@ -37,10 +38,11 @@ function App() {
           <Route path="/tech" element={<TechPage />} />
 
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/buylist" element={<BuyList />} />
+          <Route path="/buylist" element={<PrivateRoute><BuyList /></PrivateRoute>} />
           <Route path="/stockform" element={<PrivateRoute><StockForm /></PrivateRoute>} />
           <Route path="/compare" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/teams" element={<PrivateRoute><Teams /></PrivateRoute>} />
+          <Route path="/team/:teamId" element={<PrivateRoute><TeamDetail /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

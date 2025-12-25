@@ -1,5 +1,5 @@
 import Stock from '../models/Stock.js';
-import BuyList from '../src/components/BuyList.jsx';
+// import BuyList from '../src/components/BuyList.jsx';
 import { notifyTeam } from '../services/teamNotifier.js';
 
 /* ================= ADD STOCK ================= */

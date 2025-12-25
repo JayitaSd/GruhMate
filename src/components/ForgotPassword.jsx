@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { chef } from '../assets/images';
 
 const ForgotPassword = () => {
@@ -13,6 +14,9 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
+
+  // Update this with your backend URL
+  const API_URL = 'http://localhost:5000/api/auth';
 
   // Timer for OTP resend
   React.useEffect(() => {
@@ -59,7 +63,7 @@ const ForgotPassword = () => {
     return '';
   };
 
-  const handlePhoneSubmit = (e) => {
+  const handlePhoneSubmit = async (e) => {
     e.preventDefault();
     const phoneError = validatePhone(phone);
     
@@ -69,15 +73,27 @@ const ForgotPassword = () => {
     }
 
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    setErrors({});
+
+    try {
+      const formattedPhone = `+91${phone}`;
+      const response = await axios.post(`${API_URL}/forgot-password`, {
+        phone: formattedPhone
+      });
+
       setLoading(false);
       setStep(2);
-      setErrors({});
-      setTimer(30); // 30 seconds timer
+      setTimer(30);
       setCanResend(false);
-      console.log('OTP sent to:', phone);
-    }, 1000);
+      
+      // Optional: Show success message
+      console.log('Success:', response.data.message);
+    } catch (error) {
+      setLoading(false);
+      const errorMessage = error.response?.data?.message || 'Failed to send OTP. Please try again.';
+      setErrors({ phone: errorMessage });
+      console.error('Phone submit error:', error);
+    }
   };
 
   const handleOTPSubmit = (e) => {
@@ -90,16 +106,16 @@ const ForgotPassword = () => {
     }
 
     setLoading(true);
-    // Simulate OTP verification
+    
+    // Move to next step after brief delay
     setTimeout(() => {
       setLoading(false);
       setStep(3);
       setErrors({});
-      console.log('OTP verified:', otp);
-    }, 1000);
+    }, 500);
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     const passwordError = validatePassword(newPassword);
     const confirmError = newPassword !== confirmPassword ? 'Passwords do not match' : '';
@@ -113,25 +129,47 @@ const ForgotPassword = () => {
     }
 
     setLoading(true);
-    // Simulate password reset API call
-    setTimeout(() => {
+    setErrors({});
+
+    try {
+      const formattedPhone = `+91${phone}`;
+      const response = await axios.post(`${API_URL}/reset-password`, {
+        phone: formattedPhone,
+        code: otp,
+        newPassword: newPassword
+      });
+
       setLoading(false);
-      alert('Password reset successfully! You can now login with your new password.');
+      alert(response.data.message || 'Password reset successfully! You can now login with your new password.');
       navigate('/login');
-    }, 1000);
+    } catch (error) {
+      setLoading(false);
+      const errorMessage = error.response?.data?.message || 'Failed to reset password. Please try again.';
+      setErrors({ newPassword: errorMessage });
+      console.error('Password reset error:', error);
+    }
   };
 
-  const handleResendOTP = () => {
+  const handleResendOTP = async () => {
     if (!canResend) return;
     
     setLoading(true);
-    // Simulate OTP resend
-    setTimeout(() => {
+    
+    try {
+      const formattedPhone = `+91${phone}`;
+      await axios.post(`${API_URL}/forgot-password`, {
+        phone: formattedPhone
+      });
+
       setLoading(false);
       setTimer(30);
       setCanResend(false);
       alert('OTP has been resent to your phone');
-    }, 1000);
+    } catch (error) {
+      setLoading(false);
+      alert('Failed to resend OTP. Please try again.');
+      console.error('Resend OTP error:', error);
+    }
   };
 
   const formatTimer = (seconds) => {
@@ -141,18 +179,17 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-blue-400 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white shadow-sm">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-16">
-            
             <Link to="/" className="flex items-center space-x-2">
               <img 
-              src={chef} 
-              alt="GruhMate Logo" 
-              className="w-8 h-8"
-            />
+                src={chef} 
+                alt="GruhMate Logo" 
+                className="w-8 h-8"
+              />
               <span className="text-xl font-bold text-gray-900">GruhMate</span>
             </Link>
 
@@ -168,7 +205,7 @@ const ForgotPassword = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center py-8">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md px-4">
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -191,8 +228,8 @@ const ForgotPassword = () => {
               <div className="absolute top-4 left-0 w-full h-1 bg-gray-200 -z-10"></div>
               <div 
                 className={`absolute top-4 left-0 h-1 -z-10 transition-all duration-300 ${
-                  step >= 2 ? 'w-2/3' : step === 1 ? 'w-0' : 'w-1/3'
-                } ${step === 3 ? 'bg-green-500' : 'bg-blue-500'}`}
+                  step === 3 ? 'w-full bg-green-500' : step === 2 ? 'w-1/2 bg-blue-500' : 'w-0 bg-blue-500'
+                }`}
               ></div>
               
               {[1, 2, 3].map((stepNumber) => (
@@ -292,7 +329,7 @@ const ForgotPassword = () => {
                   
                   <div className="mt-4 text-center">
                     <p className="text-sm text-gray-600">
-                      OTP sent to: <span className="font-medium">******{phone.slice(-4)}</span>
+                      OTP sent to: <span className="font-medium">+91 ******{phone.slice(-4)}</span>
                     </p>
                     <div className="mt-2">
                       {timer > 0 ? (
@@ -412,7 +449,7 @@ const ForgotPassword = () => {
                   {loading ? (
                     <div className="flex items-center justify-center">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Resetting...
+                      Resetting Password...
                     </div>
                   ) : (
                     'Reset Password'
@@ -453,7 +490,7 @@ const ForgotPassword = () => {
       <footer className="bg-gray-900 text-white">
         <div className="container mx-auto px-6 py-6">
           <div className="text-center">
-            <p className="text-gray-400">© 2026 GruhMate. All rights reserved.</p>
+            <p className="text-gray-400">© 2025 GruhMate. All rights reserved.</p>
             <p className="text-gray-500 text-sm mt-1">Password Recovery System</p>
           </div>
         </div>

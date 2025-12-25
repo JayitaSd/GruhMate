@@ -34,6 +34,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
 
 // app.use('/api/stocks', Stock);
+import userRoutes from './routes/user.js';
+
+// Add this with your other routes
+app.use('/api/user', userRoutes);
+
 app.use('/api/stock', stockRoutes);
 app.use("/", groceryRoutes);
 app.use("/", techRoutes);
