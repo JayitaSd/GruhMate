@@ -1,4 +1,6 @@
 import Stock from '../models/Stock.js';
+import BuyList from '../src/components/BuyList.jsx';
+import { notifyTeam } from '../services/teamNotifier.js';
 
 /* ================= ADD STOCK ================= */
 export const addStock = async (req, res) => {
@@ -23,7 +25,10 @@ export const addStock = async (req, res) => {
       expiryDate: expiryDate || null,
       brand
     });
-    console.log(stock);
+    await notifyTeam(
+      teamId,
+      `📦 New stock added: ${name} (${quantity} ${unit})`
+    );
 
     res.status(201).json(stock);
   } catch (error) {

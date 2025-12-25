@@ -54,63 +54,63 @@ router.get("/team/:teamId", getStockByTeam);
 // });
 router.patch("/:id/decrement", async (req, res) => {
   try {
-    const { id } = req.params;
-    const stock = await Stock.findById(id);
+    const stock = await Stock.findById(req.params.id);
+    if (!stock) return res.status(404).json({ message: "Stock not found" });
 
-    if (!stock) {
-      return res.status(404).json({ message: "Stock not found" });
-    }
+    stock.quantity -= 1;
+    await stock.save();
 
-    if (typeof stock.quantity !== "number") {
-      return res.status(400).json({ message: "Quantity must be a number" });
-    }
-
-    if (stock.quantity > 0) {
-      stock.quantity -= 1;
-      await stock.save();
-    }
+    await notifyTeam(
+      stock.teamId,
+      `➖ ${stock.name} quantity reduced. Remaining: ${stock.quantity} ${stock.unit}`
+    );
 
     if (stock.quantity === 0) {
-      // Defensive: ensure teamId exists
-      if (!stock.teamId) {
-        return res.status(400).json({ message: "Stock missing teamId, cannot add to BuyList" });
-      }
-
       const buyItem = await BuyList.create({
         teamId: stock.teamId,
         itemName: stock.name,
-        unit: stock.unit || "pcs",
-        brand: stock.brand || null,
+        unit: stock.unit,
+        brand: stock.brand
       });
-      console.log(Stock.findByIdAndDelete(id));
-      await Stock.findByIdAndDelete(id);
 
-       res.json({
-        message: `⚠️ Stock for ${stock.name} has reached ZERO! Added to BuyList.`,
-        stock,
+      await notifyTeam(
+        stock.teamId,
+        `⚠️ ${stock.name} is finished and added to BuyList`
+      );
+
+      await Stock.findByIdAndDelete(stock._id);
+
+      return res.json({
+        message: "Stock finished and added to BuyList",
         buyItem,
-        remove: true,
+        remove: true
       });
-    } else {
-      res.json({ message: "Stock quantity decreased by 1", stock, remove: false });
     }
+
+    res.json({ stock, remove: false });
   } catch (err) {
-    console.error("Backend decrement error:", err);
-    res.status(500).json({ message: "Server error: " + err.message });
+    res.status(500).json({ message: err.message });
   }
 });
+
 
 // Increment stock quantity by 1
 router.patch("/:id/increment", async (req, res) => {
   try {
-    const { id } = req.params;
-    const updated = await Stock.findByIdAndUpdate(
-      id,
+    const stock = await Stock.findByIdAndUpdate(
+      req.params.id,
       { $inc: { quantity: 1 } },
       { new: true }
     );
-    if (!updated) return res.status(404).json({ message: "Stock not found" });
-    res.json({ message: "Stock quantity increased by 1", stock: updated });
+
+    if (!stock) return res.status(404).json({ message: "Stock not found" });
+
+    await notifyTeam(
+      stock.teamId,
+      `➕ ${stock.name} quantity increased. Now: ${stock.quantity} ${stock.unit}`
+    );
+
+    res.json({ stock });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
