@@ -1,5 +1,5 @@
 import Stock from '../models/Stock.js';
-// import BuyList from '../src/components/BuyList.jsx';
+import BuyList from '../models/BuyList.js'; // ✅ Add this
 import { notifyTeam } from '../services/teamNotifier.js';
 
 /* ================= ADD STOCK ================= */
@@ -12,7 +12,8 @@ export const addStock = async (req, res) => {
       unit,
       consumptionRate,
       expiryDate,
-      brand
+      brand,
+      userName // ✅ Add this
     } = req.body;
     console.log(req.body);
 
@@ -25,9 +26,11 @@ export const addStock = async (req, res) => {
       expiryDate: expiryDate || null,
       brand
     });
+
+    // ✅ Enhanced notification with user name
     await notifyTeam(
       teamId,
-      `📦 New stock added: ${name} (${quantity} ${unit})`
+      `✅ NEW STOCK ADDED!\n📦 Item: ${name}\n📊 Quantity: ${quantity} ${unit}\n🏷️ Brand: ${brand || 'N/A'}\n👤 Added by: ${userName || 'Team member'}`
     );
 
     res.status(201).json(stock);
@@ -36,20 +39,7 @@ export const addStock = async (req, res) => {
   }
 };
 
-
 /* ================= GET STOCK BY TEAM ================= */
-// export const getStockByTeam = async (req, res) => {
-//   try {
-//     const { teamId } = req.params;
-
-//     const stock = await Stock.find({ teamId }).populate('teamId', 'teamName');
-
-
-//     res.json(stock);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 export const getStockByTeam = async (req, res) => {
   try {
     const { teamId } = req.params;
@@ -65,3 +55,52 @@ export const getStockByTeam = async (req, res) => {
   }
 };
 
+/* ================= UPDATE STOCK (Optional - if you want) ================= */
+export const updateStock = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userName, ...updateData } = req.body;
+
+    const stock = await Stock.findByIdAndUpdate(id, updateData, { new: true });
+    
+    if (!stock) {
+      return res.status(404).json({ message: "Stock not found" });
+    }
+
+    await notifyTeam(
+      stock.teamId,
+      `✏️ STOCK UPDATED\n📦 ${stock.name} has been updated\n👤 By: ${userName || 'Team member'}`
+    );
+
+    res.json(stock);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/* ================= DELETE STOCK ================= */
+export const deleteStock = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userName } = req.body;
+
+    const stock = await Stock.findById(id);
+    if (!stock) {
+      return res.status(404).json({ message: "Stock not found" });
+    }
+
+    const stockName = stock.name;
+    const teamId = stock.teamId;
+
+    await Stock.findByIdAndDelete(id);
+
+    await notifyTeam(
+      teamId,
+      `🗑️ STOCK DELETED\n📦 ${stockName} has been removed from inventory\n👤 By: ${userName || 'Team member'}`
+    );
+
+    res.json({ message: "Stock deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

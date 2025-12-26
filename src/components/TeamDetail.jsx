@@ -191,7 +191,7 @@ const handleDeleteTeam = async () => {
   const isMember = team.members?.some((m) => m._id === loggedInUserId) || false;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-6">
+    <div className="min-h-screen bg-gradient-to-from-purple-50 to-pink-100 p-6">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
@@ -201,7 +201,7 @@ const handleDeleteTeam = async () => {
               
               {/* ✅ Team Code - Only visible to Admin */}
               {isAdmin && (
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-4 mt-3 max-w-md">
+                <div className="bg-gradient-to-from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-4 mt-3 max-w-md">
                   <p className="text-sm text-gray-600 mb-2 font-semibold">
                     🔑 Team Invite Code (Share with members)
                   </p>

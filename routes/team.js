@@ -146,17 +146,16 @@ router.post("/accept", async (req, res) => {
 
     const team = await Team.findById(invite.teamId).populate("members");
     const user = await User.findById(invite.userId);
+    const admin = await User.findById(adminId);
 
     if (!team || !user) {
       return res.status(404).json({ error: "Team or user not found" });
     }
 
-    // Verify admin permission
     if (team.admin.toString() !== adminId) {
       return res.status(403).json({ error: "Only team admin can accept requests" });
     }
 
-    // Check if user already in another team
     if (user.team) {
       return res.status(400).json({ error: "User already belongs to a team" });
     }
@@ -170,21 +169,18 @@ router.post("/accept", async (req, res) => {
     invite.status = "ACCEPTED";
     await invite.save();
 
-    // Notify all team members
-    for (const member of team.members) {
-      if (member.phone) {
-        await sendWhatsApp(
-          member.phone,
-          `${user.name} has joined the team "${team.name}".`
-        );
-      }
-    }
+    // ✅ Notify all team members
+    await notifyTeam(
+      team._id,
+      `🎉 NEW MEMBER JOINED!\n👤 ${user.name} has joined team "${team.name}"\n✅ Approved by: ${admin?.name || 'Admin'}`
+    );
 
     res.json({ message: "Member added successfully", team });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 /* ===========================
    REJECT INVITE (ADMIN ONLY)
@@ -342,7 +338,6 @@ router.post("/leave", async (req, res) => {
     const team = await Team.findById(user.team);
     if (!team) return res.status(404).json({ error: "Team not found" });
 
-    // Admin cannot leave (must transfer or delete team)
     if (team.admin.toString() === userId) {
       return res.status(400).json({ 
         error: "Admin cannot leave. Transfer admin rights first or delete the team" 
@@ -355,12 +350,17 @@ router.post("/leave", async (req, res) => {
     user.team = null;
     await user.save();
 
+    // ✅ Notify remaining team members
+    await notifyTeam(
+      team._id,
+      `👋 MEMBER LEFT\n👤 ${user.name} has left team "${team.name}"`
+    );
+
     res.json({ message: "Successfully left the team" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 /* ===========================
    REMOVE MEMBER (ADMIN ONLY)
    =========================== */
@@ -372,6 +372,9 @@ router.post("/remove", async (req, res) => {
     }
 
     const team = await Team.findById(teamId);
+    const removedUser = await User.findById(memberId);
+    const admin = await User.findById(adminId);
+
     if (!team) return res.status(404).json({ error: "Team not found" });
 
     if (team.admin.toString() !== adminId) {
@@ -382,20 +385,26 @@ router.post("/remove", async (req, res) => {
       return res.status(400).json({ error: "Admin cannot remove themselves" });
     }
 
-    const user = await User.findById(memberId);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!removedUser) return res.status(404).json({ error: "User not found" });
 
     team.members = team.members.filter(m => m.toString() !== memberId);
     await team.save();
 
-    user.team = null;
-    await user.save();
+    removedUser.team = null;
+    await removedUser.save();
+
+    // ✅ Notify remaining team members
+    await notifyTeam(
+      teamId,
+      `⚠️ MEMBER REMOVED\n👤 ${removedUser.name} has been removed from team "${team.name}"\n🔨 By: ${admin?.name || 'Admin'}`
+    );
 
     res.json({ message: "Member removed successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 /* ===========================
    GET ALL TEAMS (FOR BROWSING)

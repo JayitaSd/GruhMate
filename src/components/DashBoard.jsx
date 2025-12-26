@@ -6,53 +6,49 @@ import Footer from "./Footer";
 import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => { 
-
-  const { currentUser } = useAuth();
-  const { logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation(); 
-  // const [stocks, setStocks] = useState([]);
-const [buyList, setBuyList] = useState([]);
-
-
-  //  REAL STOCK DATA
+  const [buyList, setBuyList] = useState([]);
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  //  NEW: refresh trigger
   const [refreshKey, setRefreshKey] = useState(0);
-  const teamId = localStorage.getItem("teamId");
 
+  // ✅ FIXED: Get teamId from currentUser.team
+  const teamId = currentUser?.team;
 
-
-  //  Fetch stock from backend
+  // Fetch stock from backend
   const fetchStocks = async () => {
     try {
       setLoading(true);
-      // const teamId = localStorage.getItem("teamId");
-      // const { currentUser } = useAuth();
-      const teamId = currentUser?.teamId;
+      
+      // ✅ Check if user has a team
+      if (!teamId) {
+        console.log("User has no team assigned");
+        setStocks([]);
+        setLoading(false);
+        return;
+      }
 
       const res = await axios.get(
-        // `http://localhost:5000/api/stocks/team/${teamId}`
-         `http://localhost:5000/api/stock/team/${teamId}`,{
-           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-         }
+        `http://localhost:5000/api/stock/team/${teamId}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        }
       );
       setStocks(res.data);
     } catch (err) {
       console.error("Error fetching stocks", err);
+      setStocks([]);
     } finally {
       setLoading(false);
     }
   };
 
-  //  Runs on first load AND whenever refreshKey changes
   useEffect(() => {
     fetchStocks();
-  }, [refreshKey]);
+  }, [refreshKey, teamId]); // ✅ Added teamId dependency
 
-  //  Detect navigation from StockForm
   useEffect(() => {
     if (location.state?.refresh) {
       setRefreshKey((prev) => prev + 1);
@@ -66,7 +62,7 @@ const [buyList, setBuyList] = useState([]);
     return "normal";
   };
 
-  // Dashboard stats (derived)
+  // Dashboard stats
   const dashboardStats = {
     totalItems: stocks.length,
     lowStockCount: stocks.filter(
@@ -83,85 +79,77 @@ const [buyList, setBuyList] = useState([]);
     navigate("/", { replace: true });
   };
 
-const handleDecrease = async (id,name) => {
+  const handleDecrease = async (id, name) => {
   try {
-     const confirmDelete = window.confirm(`Are you sure you want to delete "${name}" from BuyList?`);
     const res = await axios.patch(
       `http://localhost:5000/api/stock/${id}/decrement`,
-      {},
+      { userName: currentUser?.name },
       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
     );
 
-    const updatedStock = res.data.stock;
-
-    setStocks((prev) =>
-      prev.map((s) =>
-        s._id === id ? { ...s, quantity: updatedStock.quantity } : s
-      )
-    );
-
-    if (res.data.buyItem) {
+    // ✅ Check if item was removed (quantity reached 0)
+    if (res.data.remove) {
+      setStocks((prev) => prev.filter((s) => s._id !== id));
       alert(res.data.message);
-      navigate("/buylist"); // redirect to BuyList.jsx
+      navigate("/buylist");
+    } else {
+      const updatedStock = res.data.stock;
+      setStocks((prev) =>
+        prev.map((s) =>
+          s._id === id ? { ...s, quantity: updatedStock.quantity } : s
+        )
+      );
     }
   } catch (err) {
     console.error("Decrease error:", err);
+    
+    // ✅ Show specific error message
+    if (err.response?.status === 400) {
+      alert(err.response?.data?.message || "Cannot decrease stock further");
+    } else {
+      alert("Failed to decrease stock");
+    }
   }
 };
-// const handleDecrease = async (id) => {
-//   try {
-//     console.log("aayi handleDecrease mein")
-//     const res = await axios.patch(
-//       `http://localhost:5000/api/stock/${id}/decrement`,
-//       {},
-//       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-//     );
-//     console.log(res)
-
-//     const updatedStock = res.data.stock;
-
-//     setStocks((prev) => {
-//       if (res.data.remove) {
-//         // remove item completely
-//         return prev.filter((s) => s._id !== id);
-//       } else {
-//         // just update quantity
-//         return prev.map((s) =>
-//           s._id === id ? { ...s, quantity: updatedStock.quantity } : s
-//         );
-//       }
-//     });
-
-//     if (res.data.buyItem) {
-//       // add to buyList state
-//       setBuyList((prev) => [...prev, res.data.buyItem]);
-//       alert(res.data.message);
-//     }
-//   } catch (err) {
-//     console.error("Decrease error:", err);
-//   }
-// };
 
 
-const handleIncrease = async (id) => {
-  try {
-    const res = await axios.patch(
-      `http://localhost:5000/api/stock/${id}/increment`,
-      {}, // no body needed, backend increments itself
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+  const handleIncrease = async (id) => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:5000/api/stock/${id}/increment`,
+        { userName: currentUser?.name }, // ✅ Send userName for notifications
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
+
+      const updatedStock = res.data.stock;
+      setStocks((prev) =>
+        prev.map((s) =>
+          s._id === id ? { ...s, quantity: updatedStock.quantity } : s
+        )
+      );
+    } catch (err) {
+      console.error("Increase error:", err);
+      alert("Failed to increase stock");
+    }
+  };
+
+  // ✅ Show message if user has no team
+  if (!teamId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Team Assigned</h2>
+          <p className="text-gray-600 mb-6">You need to create or join a team first</p>
+          <Link
+            to="/teams"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Go to Teams
+          </Link>
+        </div>
+      </div>
     );
-
-    const updatedStock = res.data.stock;
-
-    setStocks((prev) =>
-      prev.map((s) =>
-        s._id === id ? { ...s, quantity: updatedStock.quantity } : s
-      )
-    );
-  } catch (err) {
-    console.error("Increase error:", err);
   }
-};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -185,23 +173,27 @@ const handleIncrease = async (id) => {
                 Price Compare
               </Link>
               <Link to="/teams" className="text-gray-700 hover:text-blue-600 font-medium">
-                Teams Page
+                Teams
               </Link>
               <Link to="/stockform" className="text-gray-700 hover:text-blue-600 font-medium">
-                Stock Form
+                Add Stock
               </Link>
-                <Link to="/buylist" className="text-gray-700 hover:text-blue-600 font-medium">
+              <Link to="/buylist" className="text-gray-700 hover:text-blue-600 font-medium">
                 BuyList
               </Link>
             </nav>
 
             <div className="flex items-center space-x-4">
               <div className="text-right hidden md:block">
-                <p className="text-sm font-medium text-gray-900">Welcome, User</p>
+                <p className="text-sm font-medium text-gray-900">
+                  Welcome, {currentUser?.name || 'User'}
+                </p>
                 <p className="text-xs text-gray-500">Family Account</p>
               </div>
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-medium">U</span>
+                <span className="text-blue-600 font-medium">
+                  {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
               </div>
               <button
                 onClick={handleLogout}
@@ -246,7 +238,7 @@ const handleIncrease = async (id) => {
         {/* Stock Table */}
         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="px-6 py-4 border-b flex justify-between items-center">
-            <h2 className="text-xl font-bold">Low Stock Items</h2>
+            <h2 className="text-xl font-bold">Stock Items</h2>
             <Link
               to="/stockform"
               className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
@@ -264,19 +256,20 @@ const handleIncrease = async (id) => {
                   <th className="text-left py-3 px-6">Available Quantity</th>
                   <th className="text-left py-3 px-6">Inventory Unit</th>
                   <th className="text-left py-3 px-6">Status</th>
+                  <th className="text-left py-3 px-6">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="5" className="py-6 text-center text-gray-500">
+                    <td colSpan="6" className="py-6 text-center text-gray-500">
                       Loading stock...
                     </td>
                   </tr>
                 ) : stocks.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="py-6 text-center text-gray-500">
+                    <td colSpan="6" className="py-6 text-center text-gray-500">
                       No stock items added yet
                     </td>
                   </tr>
@@ -284,20 +277,22 @@ const handleIncrease = async (id) => {
                   stocks.map((item) => {
                     const status = getStatus(
                       item.quantity,
-                      item.requiredQuantity
+                      item.consumptionRate || item.requiredQuantity || 0
                     );
 
                     return (
                       <tr key={item._id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-6">
                           <div className="font-medium">{item.name}</div>
-                          {item.note && (
+                          {item.brand && (
                             <div className="text-xs text-gray-500">
-                              {item.note}
+                              Brand: {item.brand}
                             </div>
                           )}
                         </td>
-                        <td className="py-3 px-6">{item.requiredQuantity}</td>
+                        <td className="py-3 px-6">
+                          {item.consumptionRate || item.requiredQuantity || '-'}
+                        </td>
                         <td className="py-3 px-6 font-bold">{item.quantity}</td>
                         <td className="py-3 px-6">{item.unit}</td>
                         <td className="py-3 px-6">
@@ -313,26 +308,22 @@ const handleIncrease = async (id) => {
                             {status.toUpperCase()}
                           </span>
                         </td>
-                       
-                         <td className="py-3 px-6">
-          <button 
-          // onClick={() => handleDecrease(item._id,item.quantity)}
-          onClick={() => handleDecrease(item._id,item.name)}
-
-            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Delete
-          </button>
-        </td>
- <td className="py-3 px-6">
-          <button onClick={() => handleIncrease(item._id, item.quantity)}
-            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            add
-          </button>
-        </td>        
-
-                        {/* <button>delete stock</button> */}
+                        <td className="py-3 px-6">
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => handleDecrease(item._id, item.name)}
+                              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                            >
+                              -
+                            </button>
+                            <button 
+                              onClick={() => handleIncrease(item._id)}
+                              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })
@@ -343,39 +334,8 @@ const handleIncrease = async (id) => {
 
           <div className="px-6 py-4 bg-gray-50 text-sm text-gray-600">
             Showing {stocks.length} items
-           
           </div>
         </div>
-        <div>
-  {/* Stock Table */}
- 
-
-  {/* BuyList Section */}
-  {buyList.length > 0 && (
-    <div style={{ marginTop: "2rem" }}>
-      <h3>🛒 BuyList</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Item Name</th>
-            <th>Unit</th>
-            <th>Brand</th>
-          </tr>
-        </thead>
-        <tbody>
-          {buyList.map((item) => (
-            <tr key={item._id}>
-              <td>{item.itemName}</td>
-              <td>{item.unit}</td>
-              <td>{item.brand}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
-</div>
-
       </main>
 
       <Footer />
