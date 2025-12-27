@@ -1,0 +1,78 @@
+/* NutritionDashboard.css */
+.nutrition-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+.vitality-score-progress {
+  transition: width 0.5s ease-in-out;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.suggestion-card {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-left: 4px solid #f59e0b;
+  border-radius: 0 0.5rem 0.5rem 0;
+  transition: all 0.2s ease;
+}
+
+.suggestion-card:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  transform: translateX(4px);
+}
+
+.confidence-item {
+  transition: all 0.2s ease;
+}
+
+.confidence-item:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  transform: translateX(4px);
+}
+
+.pie-chart-container {
+  transition: all 0.3s ease;
+}
+
+.stat-card {
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loading-skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pie-chart-container {
+    height: 250px;
+  }
+}

@@ -15,6 +15,7 @@ import BuyList from './components/BuyList'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import TeamDetail from './components/TeamDetail'
+import NutritionDashboard from './components/NutritionDashboard'
 
 function App() {
   return (
@@ -43,6 +44,8 @@ function App() {
           <Route path="/compare" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/teams" element={<PrivateRoute><Teams /></PrivateRoute>} />
           <Route path="/team/:teamId" element={<PrivateRoute><TeamDetail /></PrivateRoute>} />
+          <Route path="/nutrition" element={<PrivateRoute><NutritionDashboard /></PrivateRoute>}/>
+
         </Routes>
       </Router>
     </AuthProvider>
