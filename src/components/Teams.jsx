@@ -12,39 +12,35 @@ const Teams = () => {
   const [message, setMessage] = useState("");
   const [myTeam, setMyTeam] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true); // ✅ NEW: Separate loading state
   const navigate = useNavigate();
+
+  // ✅ FIXED: Async refresh that properly updates context
   const refreshUserData = async () => {
     try {
       const res = await fetch(`http://localhost:5000/api/user/${loggedInUserId}`);
       const userData = await res.json();
       
       if (res.ok && userData) {
-        // Update localStorage and context
         const token = localStorage.getItem('token');
-        login(userData, token);
+        login(userData, token); // ✅ This updates currentUser in context
+        return userData; // ✅ Return the fresh user data
       }
     } catch (err) {
       console.error("Error refreshing user data:", err);
+      return null;
     }
   };
 
-  useEffect(() => {
-    if (loggedInUserId) {
-      refreshUserData()
-      fetchMyTeam();
-    }
-  }, [loggedInUserId]);
-  
-
-
-  const fetchMyTeam = async () => {
+  // ✅ FIXED: Fetch team data using the refreshed user
+  const fetchMyTeam = async (userTeamId) => {
     try {
-      if (!currentUser?.team) {
+      if (!userTeamId) {
         setMyTeam(null);
         return;
       }
 
-      const teamRes = await fetch(`http://localhost:5000/api/team/${currentUser.team}`);
+      const teamRes = await fetch(`http://localhost:5000/api/team/${userTeamId}`);
       const teamData = await teamRes.json();
       
       if (teamRes.ok && teamData.team) {
@@ -57,6 +53,32 @@ const Teams = () => {
       setMyTeam(null);
     }
   };
+
+  // ✅ FIXED: Properly initialize page with fresh data
+  useEffect(() => {
+    const initializePage = async () => {
+      if (!loggedInUserId) {
+        setPageLoading(false);
+        return;
+      }
+
+      setPageLoading(true);
+      
+      // 1. Refresh user data from backend
+      const freshUserData = await refreshUserData();
+      
+      // 2. Fetch team using the fresh data
+      if (freshUserData?.team) {
+        await fetchMyTeam(freshUserData.team);
+      } else {
+        setMyTeam(null);
+      }
+      
+      setPageLoading(false);
+    };
+
+    initializePage();
+  }, [loggedInUserId]);
 
   const handleCreateTeam = async () => {
     if (!teamName.trim()) {
@@ -83,10 +105,11 @@ const Teams = () => {
         setMessage(`Team "${teamName}" created successfully!`);
         setTeamName("");
         
-        const updatedUser = { ...currentUser, team: data.team._id };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        
-        fetchMyTeam();
+        // ✅ Refresh user data and team info
+        const freshUserData = await refreshUserData();
+        if (freshUserData?.team) {
+          await fetchMyTeam(freshUserData.team);
+        }
       } else {
         setMessage(data.error || "Failed to create team");
       }
@@ -115,6 +138,9 @@ const Teams = () => {
       if (res.ok) {
         setMessage(data.message);
         setTeamCode("");
+        
+        // ✅ Refresh after joining
+        await refreshUserData();
       } else {
         setMessage(data.error || "Failed to join team");
       }
@@ -145,9 +171,8 @@ const Teams = () => {
       if (res.ok) {
         setMessage("Team deleted successfully");
         
-        const updatedUser = { ...currentUser, team: null };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        
+        // ✅ Refresh user data and clear team
+        await refreshUserData();
         setMyTeam(null);
       } else {
         setMessage(data.error || "Failed to delete team");
@@ -157,6 +182,18 @@ const Teams = () => {
       console.error(err);
     }
   };
+
+  // ✅ Show loading spinner while page initializes
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-5xl mb-4">⏳</div>
+          <p className="text-xl text-gray-600">Loading your teams...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
