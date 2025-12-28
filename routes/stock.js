@@ -191,4 +191,34 @@ router.delete("/buylist/:id", async (req, res) => {
   }
 });
 
+// Update expiry and consumption rate
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { expiry, consumptionRate } = req.body;
+
+  if (!expiry || !consumptionRate) {
+    return res.status(400).json({ error: "Expiry and consumptionRate are required" });
+  }
+
+  try {
+    const updated = await Stock.findByIdAndUpdate(
+      id,
+      { expiry, consumptionRate },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Stock item not found" });
+    }
+
+    res.json({ message: "Stock updated successfully", stock: updated });
+  } catch (err) {
+    console.error("Error updating stock:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+
 export default router;

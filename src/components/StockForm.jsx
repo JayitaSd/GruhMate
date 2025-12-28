@@ -125,7 +125,7 @@ const StockForm = () => {
   /* ================= JSX ================= */
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow p-4 flex justify-between">
+      {/* <header className="bg-white shadow p-4 flex justify-between">
         <div className="flex items-center gap-2">
           <img src={chef} alt="logo" className="w-8 h-8" />
           <span className="font-bold text-xl">GruhMate</span>
@@ -133,7 +133,7 @@ const StockForm = () => {
         <Link to="/dashboard" className="bg-blue-600 text-white px-4 py-2 rounded">
           Dashboard
         </Link>
-      </header>
+      </header> */}
 
       <main className="max-w-2xl mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">Add Stock Item</h1>

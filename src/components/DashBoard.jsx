@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; 
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { chef } from "../assets/images";
 import Footer from "./Footer";
 import { useAuth } from "../context/AuthContext";
-import RecipesPage from "./RecipesPage"
+import RecipesPage from "./RecipesPage";
 import RecipeLauncherButton from "./RecipeLauncherButton";
 
-const Dashboard = () => { 
+const Dashboard = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation(); 
+  const location = useLocation();
   const [buyList, setBuyList] = useState([]);
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [showRecipes, setShowRecipes] = useState(false);
 
   const teamId = currentUser?.team;
+  console.log(teamId);
 
   // ✅ Check for expiring items (expires within 3 days)
   const checkExpiringItems = () => {
@@ -38,7 +39,9 @@ const Dashboard = () => {
     if (expiring.length > 0 && location.pathname === "/dashboard") {
       const itemNames = expiring.map((item) => item.name).join(", ");
       setTimeout(() => {
-        alert(`⚠️ Warning: ${expiring.length} item(s) expiring soon:\n${itemNames}`);
+        alert(
+          `⚠️ Warning: ${expiring.length} item(s) expiring soon:\n${itemNames}`
+        );
       }, 1000);
     }
   };
@@ -47,7 +50,7 @@ const Dashboard = () => {
   const fetchStocks = async () => {
     try {
       setLoading(true);
-      
+
       if (!teamId) {
         console.log("User has no team assigned");
         setStocks([]);
@@ -58,7 +61,7 @@ const Dashboard = () => {
       const res = await axios.get(
         `http://localhost:5000/api/stock/team/${teamId}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       setStocks(res.data);
@@ -74,11 +77,11 @@ const Dashboard = () => {
   const fetchBuyList = async () => {
     try {
       if (!teamId) return;
-      
+
       const res = await axios.get(
         `http://localhost:5000/api/stock/buylist/${teamId}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       setBuyList(res.data);
@@ -129,13 +132,13 @@ const Dashboard = () => {
     // This prevents waste from expired/out-of-stock items
     const estimatedSavingsPerItem = 50;
     const totalSavings = buyList.length * estimatedSavingsPerItem;
-    
+
     // Alternative: Count low stock items managed
     const lowStockManaged = stocks.filter((s) => {
       const reqQty = s.consumptionRate || s.requiredQuantity || 0;
       return s.quantity > 0 && s.quantity <= reqQty;
     }).length;
-    
+
     return Math.max(totalSavings, lowStockManaged * 100);
   }
 
@@ -149,17 +152,14 @@ const Dashboard = () => {
     return diffDays;
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
-  };
-
   const handleDecrease = async (id, name) => {
     try {
       const res = await axios.patch(
         `http://localhost:5000/api/stock/${id}/decrement`,
         { userName: currentUser?.name },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
 
       if (res.data.remove) {
@@ -176,7 +176,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error("Decrease error:", err);
-      
+
       if (err.response?.status === 400) {
         alert(err.response?.data?.message || "Cannot decrease stock further");
       } else {
@@ -190,7 +190,9 @@ const Dashboard = () => {
       const res = await axios.patch(
         `http://localhost:5000/api/stock/${id}/increment`,
         { userName: currentUser?.name },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
 
       const updatedStock = res.data.stock;
@@ -204,13 +206,19 @@ const Dashboard = () => {
       alert("Failed to increase stock");
     }
   };
+  async function handleSave(item) { try { const res = await fetch(`http://localhost:5000/api/stock/${item._id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expiryDate: item.tempExpiryDate, consumptionRate: item.tempConsumptionRate, }), }); const data = await res.json(); if (!res.ok) throw new Error(data.error || "Update failed"); // update local state with the new item 
+  setStocks(stocks.map(s => s._id === item._id ? data : s)); } catch (err) { console.error("Error saving stock:", err); alert(err.message); } }
 
   if (!teamId) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Team Assigned</h2>
-          <p className="text-gray-600 mb-6">You need to create or join a team first</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            No Team Assigned
+          </h2>
+          <p className="text-gray-600 mb-6">
+            You need to create or join a team first
+          </p>
           <Link
             to="/teams"
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -224,59 +232,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <img src={chef} alt="GruhMate Logo" className="w-8 h-8" />
-              <span className="text-xl font-bold text-gray-900">GruhMate</span>
-            </div>
-
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium">
-                Home
-              </Link>
-              <Link to="/dashboard" className="text-blue-600 font-medium">
-                Dashboard
-              </Link>
-              <Link to="/compare" className="text-gray-700 hover:text-blue-600 font-medium">
-                Price Compare
-              </Link>
-              <Link to="/teams" className="text-gray-700 hover:text-blue-600 font-medium">
-                Teams
-              </Link>
-              <Link to="/stockform" className="text-gray-700 hover:text-blue-600 font-medium">
-                Add Stock
-              </Link>
-              <Link to="/buylist" className="text-gray-700 hover:text-blue-600 font-medium">
-                BuyList
-              </Link>
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-right hidden md:block">
-                <p className="text-sm font-medium text-gray-900">
-                  Welcome, {currentUser?.name || 'User'}
-                </p>
-                <p className="text-xs text-gray-500">Family Account</p>
-              </div>
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-medium">
-                  {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
-                </span>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="ml-4 px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main */}
       <main className="container mx-auto px-6 py-8">
         <div className="mb-8">
@@ -296,10 +251,14 @@ const Dashboard = () => {
                   {expiringItems.length} Item(s) Expiring Soon!
                 </h3>
                 <p className="text-red-700 text-sm mt-1">
-                  {expiringItems.map((item) => {
-                    const days = getDaysUntilExpiry(item.expiryDate);
-                    return `${item.name} (${days} day${days !== 1 ? 's' : ''} left)`;
-                  }).join(", ")}
+                  {expiringItems
+                    .map((item) => {
+                      const days = getDaysUntilExpiry(item.expiryDate);
+                      return `${item.name} (${days} day${
+                        days !== 1 ? "s" : ""
+                      } left)`;
+                    })
+                    .join(", ")}
                 </p>
               </div>
             </div>
@@ -309,16 +268,45 @@ const Dashboard = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
-            ["Total Items", dashboardStats.totalItems, "📦", "bg-blue-50", "text-blue-600"],
-            ["Low Stock Items", dashboardStats.lowStockCount, "⚠️", "bg-yellow-50", "text-yellow-600"],
-            ["Expiring Soon", dashboardStats.expiringSoon, "⏰", "bg-red-50", "text-red-600"],
-            ["Monthly Savings", `₹${dashboardStats.monthlySavings}`, "💰", "bg-green-50", "text-green-600"],
+            [
+              "Total Items",
+              dashboardStats.totalItems,
+              "📦",
+              "bg-blue-50",
+              "text-blue-600",
+            ],
+            [
+              "Low Stock Items",
+              dashboardStats.lowStockCount,
+              "⚠️",
+              "bg-yellow-50",
+              "text-yellow-600",
+            ],
+            [
+              "Expiring Soon",
+              dashboardStats.expiringSoon,
+              "⏰",
+              "bg-red-50",
+              "text-red-600",
+            ],
+            [
+              "Monthly Savings",
+              `₹${dashboardStats.monthlySavings}`,
+              "💰",
+              "bg-green-50",
+              "text-green-600",
+            ],
           ].map(([title, value, icon, bgColor, textColor], i) => (
-            <div key={i} className={`${bgColor} rounded-xl p-6 shadow-sm border`}>
+            <div
+              key={i}
+              className={`${bgColor} rounded-xl p-6 shadow-sm border`}
+            >
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-gray-600 font-medium">{title}</p>
-                  <p className={`text-3xl font-bold mt-2 ${textColor}`}>{value}</p>
+                  <p className={`text-3xl font-bold mt-2 ${textColor}`}>
+                    {value}
+                  </p>
                 </div>
                 <div className="text-4xl">{icon}</div>
               </div>
@@ -372,79 +360,282 @@ const Dashboard = () => {
                       item.consumptionRate || item.requiredQuantity || 0
                     );
                     const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
-                    const isExpiring = daysUntilExpiry !== null && daysUntilExpiry <= 3;
+                    const isExpiring =
+                      daysUntilExpiry !== null && daysUntilExpiry <= 3;
 
                     return (
-                      <tr key={item._id} className={`border-b hover:bg-gray-50 ${isExpiring ? 'bg-red-50' : ''}`}>
-                        <td className="py-3 px-6">
-                          <div className="font-medium">{item.name}</div>
-                          {item.brand && (
-                            <div className="text-xs text-gray-500">
-                              Brand: {item.brand}
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-3 px-6">
-                          {item.consumptionRate || item.requiredQuantity || '-'}
-                        </td>
-                        <td className="py-3 px-6 font-bold">{item.quantity}</td>
-                        <td className="py-3 px-6">{item.unit}</td>
-                        <td className="py-3 px-6">
-                          {item.expiryDate ? (
-                            <div>
-                              <div className="text-sm">
-                                {new Date(item.expiryDate).toLocaleDateString()}
-                              </div>
-                              {daysUntilExpiry !== null && (
-                                <div className={`text-xs font-semibold ${
-                                  daysUntilExpiry <= 0 ? 'text-red-600' :
-                                  daysUntilExpiry <= 3 ? 'text-orange-600' :
-                                  'text-gray-500'
-                                }`}>
-                                  {daysUntilExpiry <= 0 ? '⚠️ Expired!' :
-                                   daysUntilExpiry === 1 ? '⚠️ Expires tomorrow' :
-                                   `${daysUntilExpiry} days left`}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-6">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              status === "critical"
-                                ? "bg-red-100 text-red-800"
-                                : status === "low"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-green-100 text-green-800"
-                            }`}>
-                            {status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="py-3 px-6">
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleDecrease(item._id, item.name)}
-                              disabled={item.quantity === 0}
-                              className={`px-3 py-1 rounded text-sm ${
-                                item.quantity === 0 
-                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : 'bg-red-500 text-white hover:bg-red-600'
-                              }`}
-                            >
-                              -
-                            </button>
-                            <button 
-                              onClick={() => handleIncrease(item._id)}
-                              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                      // <tr
+                      //   key={item._id}
+                      //   className={`border-b hover:bg-gray-50 ${
+                      //     isExpiring ? "bg-red-50" : ""
+                      //   }`}
+                      // >
+                      //   {/* <td className="py-3 px-6">
+                      //     <div className="font-medium">{item.name}</div>
+                      //     {item.brand && (
+                      //       <div className="text-xs text-gray-500">
+                      //         Brand: {item.brand}
+                      //       </div>
+                      //     )}
+                      //   </td> */}
+                      //   <td className="py-3 px-6">
+                      //     {item.consumptionRate ? (
+                      //       item.consumptionRate
+                      //     ) : (
+                      //       <div className="flex items-center gap-2 text-red-600">
+                      //         <span>❌ Missing</span>
+                      //         <select
+                      //           value={item.tempConsumptionRate || ""}
+                      //           onChange={(e) => {
+                      //             item.tempConsumptionRate = e.target.value;
+                      //             setStocks([...stocks]); // trigger re-render
+                      //           }}
+                      //           className="border rounded px-2 py-1"
+                      //         >
+                      //           <option value="">Select</option>
+                      //           <option value="daily">Daily</option>
+                      //           <option value="weekly">Weekly</option>
+                      //           <option value="rarely">Rarely</option>
+                      //         </select>
+                      //       </div>
+                      //     )}
+                      //   </td>
+
+                      //   <td className="py-3 px-6">
+                      //     {item.expiryDate ? (
+                      //       <div>
+                      //         <div className="text-sm">
+                      //           {new Date(item.expiryDate).toLocaleDateString()}
+                      //         </div>
+                      //         {/* existing expiry warning logic */}
+                      //       </div>
+                      //     ) : (
+                      //       <div className="flex items-center gap-2 text-red-600">
+                      //         <span>❌ Missing</span>
+                      //         <input
+                      //           type="date"
+                      //           value={item.tempExpiryDate || ""}
+                      //           onChange={(e) => {
+                      //             item.tempExpiryDate = e.target.value;
+                      //             setStocks([...stocks]);
+                      //           }}
+                      //           className="border rounded px-2 py-1"
+                      //         />
+                      //       </div>
+                      //     )}
+                      //   </td>
+
+                      //   <td className="py-3 px-6">
+                      //     <button
+                      //       onClick={() => handleSave(item)}
+                      //       disabled={
+                      //         !item.tempExpiryDate || !item.tempConsumptionRate
+                      //       }
+                      //       className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50"
+                      //     >
+                      //       Save
+                      //     </button>
+                      //   </td>
+
+                      //   <td className="py-3 px-6">
+                      //     {item.consumptionRate || item.requiredQuantity || "-"}
+                      //   </td>
+                      //   <td className="py-3 px-6 font-bold">{item.quantity}</td>
+                      //   <td className="py-3 px-6">{item.unit}</td>
+                      //   <td className="py-3 px-6">
+                      //     {item.expiryDate ? (
+                      //       <div>
+                      //         <div className="text-sm">
+                      //           {new Date(item.expiryDate).toLocaleDateString()}
+                      //         </div>
+                      //         {daysUntilExpiry !== null && (
+                      //           <div
+                      //             className={`text-xs font-semibold ${
+                      //               daysUntilExpiry <= 0
+                      //                 ? "text-red-600"
+                      //                 : daysUntilExpiry <= 3
+                      //                 ? "text-orange-600"
+                      //                 : "text-gray-500"
+                      //             }`}
+                      //           >
+                      //             {daysUntilExpiry <= 0
+                      //               ? "⚠️ Expired!"
+                      //               : daysUntilExpiry === 1
+                      //               ? "⚠️ Expires tomorrow"
+                      //               : `${daysUntilExpiry} days left`}
+                      //           </div>
+                      //         )}
+                      //       </div>
+                      //     ) : (
+                      //       <span className="text-gray-400">-</span>
+                      //     )}
+                      //   </td>
+                      //   <td className="py-3 px-6">
+                      //     <span
+                      //       className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      //         status === "critical"
+                      //           ? "bg-red-100 text-red-800"
+                      //           : status === "low"
+                      //           ? "bg-yellow-100 text-yellow-800"
+                      //           : "bg-green-100 text-green-800"
+                      //       }`}
+                      //     >
+                      //       {status.toUpperCase()}
+                      //     </span>
+                      //   </td>
+                      //   <td className="py-3 px-6">
+                      //     <div className="flex gap-2">
+                      //       <button
+                      //         onClick={() =>
+                      //           handleDecrease(item._id, item.name)
+                      //         }
+                      //         disabled={item.quantity === 0}
+                      //         className={`px-3 py-1 rounded text-sm ${
+                      //           item.quantity === 0
+                      //             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      //             : "bg-red-500 text-white hover:bg-red-600"
+                      //         }`}
+                      //       >
+                      //         -
+                      //       </button>
+                      //       <button
+                      //         onClick={() => handleIncrease(item._id)}
+                      //         className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                      //       >
+                      //         +
+                      //       </button>
+                      //     </div>
+                      //   </td>
+                      // </tr>
+                      <tr
+  key={item._id}
+  className={`border-b hover:bg-gray-50 ${isExpiring ? "bg-red-50" : ""}`}
+>
+  {/* Item Name */}
+  <td className="py-3 px-6">
+    <div className="font-medium">{item.name}</div>
+    {item.brand && (
+      <div className="text-xs text-gray-500">Brand: {item.brand}</div>
+    )}
+  </td>
+
+  {/* Min Quantity (consumptionRate / requiredQuantity, with missing form) */}
+  <td className="py-3 px-6">
+    {item.consumptionRate ? (
+      item.consumptionRate
+    ) : (
+      <div className="flex items-center gap-2 text-red-600">
+        <span>❌ Missing</span>
+        <select
+          value={item.tempConsumptionRate || ""}
+          onChange={(e) => {
+            item.tempConsumptionRate = e.target.value;
+            setStocks([...stocks]);
+          }}
+          className="border rounded px-2 py-1"
+        >
+          <option value="">Select</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="rarely">Rarely</option>
+        </select>
+      </div>
+    )}
+  </td>
+
+  {/* Available Quantity */}
+  <td className="py-3 px-6 font-bold">{item.quantity}</td>
+
+  {/* Unit */}
+  <td className="py-3 px-6">{item.unit}</td>
+
+  {/* Expiry */}
+  <td className="py-3 px-6">
+    {item.expiryDate ? (
+      <div>
+        <div className="text-sm">
+          {new Date(item.expiryDate).toLocaleDateString()}
+        </div>
+        {daysUntilExpiry !== null && (
+          <div
+            className={`text-xs font-semibold ${
+              daysUntilExpiry <= 0
+                ? "text-red-600"
+                : daysUntilExpiry <= 3
+                ? "text-orange-600"
+                : "text-gray-500"
+            }`}
+          >
+            {daysUntilExpiry <= 0
+              ? "⚠️ Expired!"
+              : daysUntilExpiry === 1
+              ? "⚠️ Expires tomorrow"
+              : `${daysUntilExpiry} days left`}
+          </div>
+        )}
+      </div>
+    ) : (
+      <div className="flex items-center gap-2 text-red-600">
+        <span>❌ Missing</span>
+        <input
+          type="date"
+          value={item.tempExpiryDate || ""}
+          onChange={(e) => {
+            item.tempExpiryDate = e.target.value;
+            setStocks([...stocks]);
+          }}
+          className="border rounded px-2 py-1"
+        />
+      </div>
+    )}
+  </td>
+
+  {/* Status */}
+  <td className="py-3 px-6">
+    <span
+      className={`px-3 py-1 rounded-full text-xs font-medium ${
+        status === "critical"
+          ? "bg-red-100 text-red-800"
+          : status === "low"
+          ? "bg-yellow-100 text-yellow-800"
+          : "bg-green-100 text-green-800"
+      }`}
+    >
+      {status.toUpperCase()}
+    </span>
+  </td>
+
+  {/* Actions */}
+  <td className="py-3 px-6">
+    <div className="flex gap-2">
+      <button
+        onClick={() => handleDecrease(item._id, item.name)}
+        disabled={item.quantity === 0}
+        className={`px-3 py-1 rounded text-sm ${
+          item.quantity === 0
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-red-500 text-white hover:bg-red-600"
+        }`}
+      >
+        -
+      </button>
+      <button
+        onClick={() => handleIncrease(item._id)}
+        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+      >
+        +
+      </button>
+      <button
+        onClick={() => handleSave(item)}
+        disabled={!item.tempExpiryDate || !item.tempConsumptionRate}
+        className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50"
+      >
+        Save
+      </button>
+    </div>
+  </td>
+</tr>
+
                     );
                   })
                 )}
@@ -452,24 +643,24 @@ const Dashboard = () => {
             </table>
           </div>
 
+          <div className="mt-6">
+            <RecipeLauncherButton onOpen={() => setShowRecipes(true)} />
+          </div>
+
+          {/* Render RecipesPage directly */}
+          {showRecipes && (
             <div className="mt-6">
-        <RecipeLauncherButton onOpen={() => setShowRecipes(true)} />
-      </div>
-
-      {/* Render RecipesPage directly */}
-      {showRecipes && (
-        <div className="mt-6">
-          <RecipesPage />
-          <button className="mt-4 px-3 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setShowRecipes(false)}
-          >
-            Close Recipes
-          </button>
-        </div>
-      )}
-
+              <RecipesPage />
+              <button
+                className="mt-4 px-3 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                onClick={() => setShowRecipes(false)}
+              >
+                Close Recipes
+              </button>
+            </div>
+          )}
         </div>
         <div></div>
-
       </main>
 
       <Footer />

@@ -15,6 +15,11 @@ Rules:
 - IMPORTANT: Always provide a "title" and "nutritionEstimate" with kcal, protein_g, and fiber_g.
 - IMPORTANT: Always populate "ingredients" with items from pantry that have quantity > 0.
 - Do not move pantry items into "buyList" unless quantity is 0 or missing.
+- You may ONLY use ingredients listed in the pantry.
+- DO NOT invent or assume ingredients.
+- DO NOT use meat, chicken, fish, eggs, or dairy unless explicitly present in the pantry.
+- If protein goal cannot be met, explain limitation using pantry items only.
+- If detergent or non-food items appear, IGNORE them.
 
 
 Schema:
