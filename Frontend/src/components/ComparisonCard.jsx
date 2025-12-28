@@ -4,7 +4,6 @@ import './ComparisonCard.css';
 export function ComparisonCard({ productName, products, mainImage }) {
   const [imageError, setImageError] = useState(false);
 
-  // Find the product image (prefer non-error image)
   const displayImage =
     mainImage || products.find((p) => p.image)?.image || '';
 
