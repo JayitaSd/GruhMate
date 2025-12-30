@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { scanInventory } from "../services/scanInventory.js";
+import { scanInventory } from "../controller/ImageScan.js";
 import Stock from "../models/Stock.js";
 
 const router = express.Router();
