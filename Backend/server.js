@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 
-// Routes
+
 import authRoutes from "./routes/auth.js";
 import teamRoutes from "./routes/team.js";
 import userRoutes from "./routes/user.js";
@@ -15,11 +15,11 @@ import recipes from "./routes/recipes.js";
 import nutritionRoutes from "./routes/nutritionRoutes.js";
 import cronRoutes from "./routes/corn.js";
 
-// Models
+
 import NutritionLog from "./models/NutritionLog.js";
 import VitalityScore from "./models/VitalityScore.js";
 
-// Services
+
 import { checkExpiringItems } from "./services/expiryChecker.js";
 import { calculateVitalityScore } from "./services/vitalityCalculator.js";
 
