@@ -13,21 +13,17 @@ import groceryRoutes from "./routes/groceryRoutes.js";
 import techRoutes from "./routes/techRoutes.js";
 import recipes from "./routes/recipes.js";
 import nutritionRoutes from "./routes/nutritionRoutes.js";
-import cronRoutes from "./routes/corn.js";
+//import cronRoutes from "./routes/cron.js";
 
 
 import NutritionLog from "./models/NutritionLog.js";
 import VitalityScore from "./models/VitalityScore.js";
 
 
-import { checkExpiringItems } from "./services/expiryChecker.js";
+//import { checkExpiringItems } from "./services/expiryChecker.js";
 import { calculateVitalityScore } from "./services/vitalityCalculator.js";
 
 dotenv.config();
-
-
-
-
 const app = express();
 
 
@@ -101,7 +97,7 @@ app.use("/", groceryRoutes);
 app.use("/", techRoutes);
 app.use("/api/recipes", recipes);
 app.use("/api/nutrition", nutritionRoutes);
-app.use("/api/cron", cronRoutes);
+//app.use("/api/cron", cronRoutes);
 
 
 app.get("/api/test/check-expiry", async (req, res) => {
