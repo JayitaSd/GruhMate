@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import RecipeDrawer from "./RecipeDrawer";
+import RecipeLauncherButton from "./RecipeLauncherButton";
 
 import Footer from "./Footer";
 const API_URL = import.meta.env.VITE_API_URL;
@@ -18,7 +20,7 @@ const Dashboard = () => {
   
   const [vitalityScore, setVitalityScore] = useState(null);
   const [vitalityLoading, setVitalityLoading] = useState(true);
-
+  const [recipeOpen, setRecipeOpen] = useState(false);
   const teamId = currentUser?.team;
 
   
@@ -491,6 +493,33 @@ useEffect(() => {
   </div>
 </div>
 
+{/* 🍳 Smart Recipe Quick Card */}
+<div className="mb-8 bg-linear-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="flex items-center space-x-4">
+      <div className="text-5xl sm:text-6xl">🍳</div>
+      <div>
+        <h3 className="text-xl font-bold text-gray-800">
+          Smart Recipe Generator
+        </h3>
+        <p className="text-gray-600 mt-1 text-sm">
+          Generate recipes instantly using items already in your kitchen
+        </p>
+        <p className="mt-2 text-sm text-gray-500">
+          AI-powered, stock-aware, nutrition-focused recipes
+        </p>
+      </div>
+    </div>
+
+    <button
+      onClick={() => setRecipeOpen(true)}
+      className="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold flex items-center justify-center space-x-2 shadow-sm"
+    >
+      <span>Generate Recipe</span>
+      <span>→</span>
+    </button>
+  </div>
+</div>
 
 
         {/* Stock Table */}
@@ -743,6 +772,7 @@ useEffect(() => {
         </div>
       </main>
 
+      <RecipeDrawer open={recipeOpen} onClose={() => setRecipeOpen(false)}/>
 
       <Footer />
     </div>
