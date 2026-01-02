@@ -3,6 +3,7 @@ import { buildPrompt } from "../utils/promptBuilder.js";
 
 export async function generateRecipeJSON(ctx) {
   const prompt = buildPrompt(ctx);
+  console.log(prompt);
   const resp = await model.generateContent(prompt);
   const text = resp.response.text();
 

@@ -109,7 +109,7 @@ const BuyList = () => {
       setDetectedItems(res.data);
       console.log("Detected:", res.data);
 
-      alert("Scan complete! Please review the items at the bottom of the page.");
+      alert("Scan complete! Please review the items in dashboard");
     } catch (err) {
       console.error("Scan failed", err);
       alert("Image scan failed. Please try again.");

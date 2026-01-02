@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import os from "os";
 import { scanInventory } from "../controller/ImageScan.js";
 import Stock from "../models/Stock.js";
 
@@ -10,7 +11,7 @@ const router = express.Router();
 // ✅ Configure multer to use /tmp directory (Vercel-compatible)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '/tmp');  // Only writable location on Vercel
+    cb(null,  os.tmpdir());  // Only writable location on Vercel
   },
   filename: (req, file, cb) => {
     const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
@@ -59,7 +60,7 @@ router.post("/scan-stock", upload.single("image"), async (req, res) => {
     const savedItems = [];
     for (const item of scannedItems) {
       const stockItem = await Stock.create({
-        team: teamId,
+        teamId: teamId,
         name: item.item,
         quantity: item.quantity || 1,
         unit: item.unit || 'pcs',

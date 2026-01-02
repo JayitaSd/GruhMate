@@ -29,7 +29,7 @@ Schema:
   "ingredients": [
     { "name": "string", "quantity": 0, "unit": "string", "note": "string?" }
   ],
-  "steps": ["string"], // must have at least 1 item
+  "steps": ["string"], 
   "nutritionEstimate": { "kcal": 0, "protein_g": 0, "fiber_g": 0 },
   "expiryWarnings": ["string"],
   "buyList": ["string"],
