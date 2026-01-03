@@ -9,8 +9,8 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();  
   const [formData, setFormData] = useState({
-    phone: '',
-    password: ''
+    phone: '8454803210',
+    password: 'khanqais'
   });
   const [errors, setErrors] = useState({
     phone: '',
@@ -111,7 +111,7 @@ const Login = () => {
               <input
                 type="text"
                 name="phone"
-                placeholder="Enter your phone number"
+                placeholder="8454803210"
                 value={formData.phone}
                 onChange={handleInputChange}
                 className="w-full px-6 py-3 bg-blue-50 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -126,7 +126,7 @@ const Login = () => {
               <input
                 type="password"
                 name="password"
-                placeholder="Enter your password"
+                placeholder="khanqais"
                 value={formData.password}
                 onChange={handleInputChange}
                 className="w-full px-6 py-3 bg-blue-50 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
